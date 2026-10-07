@@ -27,148 +27,94 @@ jobs:
           mkdir -p buildapp/app/src/main/java/com/softchat/app
           mkdir -p buildapp/app/src/main/res/values
 
-          cat > buildapp/settings.gradle <<'EOF'
-          pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
-          }
+          printf '%s\n' \
+          'pluginManagement {' \
+          '    repositories {' \
+          '        google()' \
+          '        mavenCentral()' \
+          '        gradlePluginPortal()' \
+          '    }' \
+          '}' \
+          '' \
+          'rootProject.name = "SoftChat"' \
+          'include(":app")' \
+          > buildapp/settings.gradle
 
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
+          printf '%s\n' \
+          'plugins {' \
+          '    id "com.android.application" version "8.6.1" apply false' \
+          '}' \
+          > buildapp/build.gradle
 
-          rootProject.name = "SoftChat"
-          include(":app")
-          EOF
+          printf '%s\n' \
+          'plugins {' \
+          '    id "com.android.application"' \
+          '}' \
+          '' \
+          'android {' \
+          '    namespace "com.softchat.app"' \
+          '    compileSdk 35' \
+          '' \
+          '    defaultConfig {' \
+          '        applicationId "com.softchat.app"' \
+          '        minSdk 23' \
+          '        targetSdk 35' \
+          '        versionCode 1' \
+          '        versionName "1.0"' \
+          '    }' \
+          '}' \
+          > buildapp/app/build.gradle
 
-          cat > buildapp/build.gradle <<'EOF'
-          plugins {
-              id 'com.android.application' version '8.6.1' apply false
-          }
-          EOF
+          printf '%s\n' \
+          '<?xml version="1.0" encoding="utf-8"?>' \
+          '<manifest xmlns:android="http://schemas.android.com/apk/res/android">' \
+          '    <uses-permission android:name="android.permission.INTERNET" />' \
+          '    <application android:theme="@style/AppTheme" android:label="SoftChat">' \
+          '        <activity android:name=".MainActivity" android:exported="true">' \
+          '            <intent-filter>' \
+          '                <action android:name="android.intent.action.MAIN" />' \
+          '                <category android:name="android.intent.category.LAUNCHER" />' \
+          '            </intent-filter>' \
+          '        </activity>' \
+          '    </application>' \
+          '</manifest>' \
+          > buildapp/app/src/main/AndroidManifest.xml
 
-          cat > buildapp/app/build.gradle <<'EOF'
-          plugins {
-              id 'com.android.application'
-          }
+          printf '%s\n' \
+          '<resources>' \
+          '    <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">' \
+          '        <item name="android:fontFamily">sans</item>' \
+          '        <item name="android:colorAccent">#D9A7B5</item>' \
+          '        <item name="android:navigationBarColor">#FFF9F5</item>' \
+          '        <item name="android:statusBarColor">#FFF9F5</item>' \
+          '        <item name="android:windowLightStatusBar">true</item>' \
+          '    </style>' \
+          '</resources>' \
+          > buildapp/app/src/main/res/values/styles.xml
 
-          android {
-              namespace 'com.softchat.app'
-              compileSdk 35
-
-              defaultConfig {
-                  applicationId 'com.softchat.app'
-                  minSdk 23
-                  targetSdk 35
-                  versionCode 1
-                  versionName '1.0'
-              }
-          }
-          EOF
-
-          cat > buildapp/app/src/main/AndroidManifest.xml <<'EOF'
-          <?xml version="1.0" encoding="utf-8"?>
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <uses-permission android:name="android.permission.INTERNET" />
-              <application
-                  android:theme="@style/AppTheme"
-                  android:label="SoftChat"
-                  android:usesCleartextTraffic="true">
-                  <activity
-                      android:name=".MainActivity"
-                      android:exported="true">
-                      <intent-filter>
-                          <action android:name="android.intent.action.MAIN" />
-                          <category android:name="android.intent.category.LAUNCHER" />
-                      </intent-filter>
-                  </activity>
-              </application>
-          </manifest>
-          EOF
-
-          cat > buildapp/app/src/main/res/values/styles.xml <<'EOF'
-          <resources>
-              <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
-                  <item name="android:fontFamily">sans</item>
-                  <item name="android:colorAccent">#D9A7B5</item>
-                  <item name="android:navigationBarColor">#FFF9F5</item>
-                  <item name="android:statusBarColor">#FFF9F5</item>
-                  <item name="android:windowLightStatusBar">true</item>
-              </style>
-          </resources>
-          EOF
-
-          cat > buildapp/app/src/main/java/com/softchat/app/MainActivity.java <<'EOF'
-          package com.softchat.app;
-
-          import android.app.Activity;
-          import android.os.Bundle;
-          import android.webkit.WebSettings;
-          import android.webkit.WebView;
-          import android.webkit.WebViewClient;
-
-          public class MainActivity extends Activity {
-              WebView web;
-
-              @Override
-              protected void onCreate(Bundle savedInstanceState) {
-                  super.onCreate(savedInstanceState);
-
-                  web = new WebView(this);
-                  setContentView(web);
-
-                  WebSettings s = web.getSettings();
-                  s.setJavaScriptEnabled(true);
-                  s.setDomStorageEnabled(true);
-                  s.setDatabaseEnabled(true);
-                  s.setUserAgentString(s.getUserAgentString() + " SoftChat/1.0");
-
-                  web.setWebViewClient(new WebViewClient() {
-                      @Override
-                      public void onPageFinished(WebView view, String url) {
-                          String css =
-                              "body{background:#fff9f5!important;}" +
-                              "textarea{background:#fffdfb!important;border-radius:22px!important;" +
-                              "border:1px solid #ead7d7!important;}" +
-                              "[data-message-author-role='user']{background:#f7dfe5!important;" +
-                              "border-radius:22px!important;}" +
-                              "[data-message-author-role='assistant']{background:#fffdfb!important;" +
-                              "border-radius:22px!important;}";
-
-                          String js =
-                              "javascript:(function(){" +
-                              "var s=document.getElementById('softchat-style');" +
-                              "if(!s){s=document.createElement('style');s.id='softchat-style';" +
-                              "s.innerHTML=" + quote(css) + ";document.head.appendChild(s);}" +
-                              "})()";
-
-                          view.evaluateJavascript(js, null);
-                      }
-                  });
-
-                  web.loadUrl("https://chatgpt.com/");
-              }
-
-              private static String quote(String s) {
-                  return "'" + s.replace("\\", "\\\\")
-                          .replace("'", "\\'")
-                          .replace("\n", "") + "'";
-              }
-
-              @Override
-              public void onBackPressed() {
-                  if (web.canGoBack()) web.goBack();
-                  else super.onBackPressed();
-              }
-          }
-          EOF
+          printf '%s\n' \
+          'package com.softchat.app;' \
+          '' \
+          'import android.app.Activity;' \
+          'import android.os.Bundle;' \
+          'import android.webkit.WebSettings;' \
+          'import android.webkit.WebView;' \
+          'import android.webkit.WebViewClient;' \
+          '' \
+          'public class MainActivity extends Activity {' \
+          '    @Override' \
+          '    protected void onCreate(Bundle savedInstanceState) {' \
+          '        super.onCreate(savedInstanceState);' \
+          '        WebView web = new WebView(this);' \
+          '        setContentView(web);' \
+          '        WebSettings settings = web.getSettings();' \
+          '        settings.setJavaScriptEnabled(true);' \
+          '        settings.setDomStorageEnabled(true);' \
+          '        web.setWebViewClient(new WebViewClient());' \
+          '        web.loadUrl("https://chatgpt.com/");' \
+          '    }' \
+          '}' \
+          > buildapp/app/src/main/java/com/softchat/app/MainActivity.java
 
       - name: Build APK
         working-directory: buildapp
